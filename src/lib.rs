@@ -1,43 +1,52 @@
 use actix_web::{web, Error, HttpResponse};
 use context::GraphQLContext;
 use database::get_pool;
-use diesel::RunQueryDsl;
-use juniper::{graphql_object, EmptyMutation, EmptySubscription, RootNode};
+use juniper::{graphql_object, EmptySubscription, RootNode, FieldResult};
 use juniper_actix::graphql_handler;
-use models::user::User;
-use schema::users::dsl::*;
+use models::user::{User, RegisterUserInput};
+
+use crate::services::user::get_user;
 
 pub mod context;
 pub mod database;
 pub mod models;
 pub mod schema;
+pub mod services;
 
-pub struct Query;
-#[graphql_object(context = GraphQLContext)]
-impl Query {
+pub struct QueryRoot;
+
+#[graphql_object(Context = GraphQLContext,
+    description = "Query Root",)]
+impl QueryRoot {
     fn api_version() -> &'static str {
-        println!("das0");
         "1.0"
     }
-    fn get_first_user(ctx: &GraphQLContext) -> User {
-        let conn = &mut ctx.pool.get().unwrap();
-        let u: User = users.first(conn).expect("msg");
-        println!("{}", u.username);
-        u
+    #[graphql(description = "get a user")]
+    fn user(ctx: &GraphQLContext, user_id: i32) -> FieldResult<User> {
+        let mut conn = ctx.pool.get().expect("Failed to get connection to database.");
+        Ok(get_user(&mut conn, user_id).expect("User does not exist"))
     }
 }
 
-pub type Schema = RootNode<
-    'static,
-    Query,
-    EmptyMutation<GraphQLContext>,
-    EmptySubscription<GraphQLContext>,
->;
+pub struct MutationRoot;
+
+#[graphql_object(Context = GraphQLContext,
+    description = "Mutation Root",)]
+impl MutationRoot {
+    #[graphql(description = "create a new user")]
+    fn register_user(ctx: &GraphQLContext, new_user: RegisterUserInput) -> FieldResult<User> {
+        let mut conn = ctx.pool.get().expect("Failed to get connection to database.");
+        Ok(services::user::create_user(&mut conn, new_user).expect("Could not create user"))
+    }
+}
+
+pub type Schema = RootNode<'static, QueryRoot, MutationRoot, EmptySubscription<GraphQLContext>>;
+
 
 pub fn schema() -> Schema {
     Schema::new(
-        Query,
-        EmptyMutation::<GraphQLContext>::new(),
+        QueryRoot,
+        MutationRoot,
         EmptySubscription::<GraphQLContext>::new(),
     )
 }
