@@ -5,6 +5,8 @@ use uuid::Uuid;
 
 use crate::schema;
 
+use super::field_error::FieldError;
+
 #[derive(Clone, Queryable, GraphQLObject)]
 ///A user
 pub struct User {
@@ -33,7 +35,17 @@ pub struct RegisterUserInput {
     pub password: String,
 }
 
+#[derive(GraphQLObject)]
 pub struct UserResponse {
     pub user: Option<User>,
-    pub error: Option<String>,
+    pub errors: Option<Vec<FieldError>>,
+}
+
+impl UserResponse {
+    pub fn build<'a>(
+        user: Option<User>,
+        errors: Option<Vec<FieldError>>,
+    ) -> UserResponse {
+        UserResponse { user, errors }
+    }
 }
