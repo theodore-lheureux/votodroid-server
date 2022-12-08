@@ -3,9 +3,10 @@
 diesel::table! {
     users (id) {
         id -> Uuid,
-        username -> Text,
-        email -> Text,
-        password -> Text,
+        username -> Varchar,
+        email -> Varchar,
+        salt -> Varchar,
+        password -> Varchar,
         created_at -> Timestamp,
         updated_at -> Timestamp,
     }

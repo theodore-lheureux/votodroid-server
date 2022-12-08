@@ -15,3 +15,6 @@ uuid = { version="0.8.2", features = ["serde", "v4"] }
 diesel = { version = "2.0", features = ["postgres", "r2d2", "chrono", "uuid"] }
 dotenvy = "0.15"
 chrono = "0.4.23"
+rust-argon2 = "1.0.0"
+rand = "0.8.5"
+regex = "1.7.0"

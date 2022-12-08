@@ -1,4 +1,4 @@
-use juniper::FieldResult;
+use regex::Regex;
 use uuid::Uuid;
 
 use crate::{
@@ -56,12 +56,59 @@ impl UserMutation {
     #[graphql(description = "create a new user")]
     fn register(
         ctx: &GraphQLContext,
-        new_user: RegisterUserInput,
-    ) -> FieldResult<User> {
+        mut new_user: RegisterUserInput,
+    ) -> UserResponse {
         let mut conn = ctx
             .pool
             .get()
             .expect("Failed to get connection to database.");
-        Ok(services::user::create_user(&mut conn, new_user)?)
+        let mut errors = vec![];
+        let email_regex = Regex::new(r"^([a-z0-9_+]([a-z0-9_+.]*[a-z0-9_+])?)@([a-z0-9]+([\-\.]{1}[a-z0-9]+)*\.[a-z]{2,6})").unwrap();
+
+        if (new_user.username.len() < 3) || (new_user.username.len() > 20) {
+            errors.push(FieldError::new(
+                "username".to_owned(),
+                "Username must be between 3 and 20 characters.".to_owned(),
+            ));
+        } else if services::user::get_by_username(&mut conn, &new_user.username)
+            .is_ok()
+        {
+            errors.push(FieldError::new(
+                "username".to_owned(),
+                "Username already exists.".to_owned(),
+            ));
+        } else if !new_user.username.chars().all(|c| c.is_alphanumeric()) {
+            errors.push(FieldError::new(
+                "username".to_owned(),
+                "Username must be alphanumeric.".to_owned(),
+            ));
+        }
+        if !email_regex.is_match(&new_user.email) {
+            errors.push(FieldError::new(
+                "email".to_owned(),
+                "Email must be valid.".to_owned(),
+            ));
+        } else if services::user::get_by_email(&mut conn, &new_user.email)
+            .is_ok()
+        {
+            errors.push(FieldError::new(
+                "email".to_owned(),
+                "Email already exists.".to_owned(),
+            ));
+        }
+        if new_user.password.len() < 8 {
+            errors.push(FieldError::new(
+                "password".to_owned(),
+                "Password must be at least 8 characters.".to_owned(),
+            ));
+        }
+
+        if !errors.is_empty() {
+            return UserResponse::from_errors(errors);
+        }
+
+        UserResponse::from_user(
+            services::user::create_user(&mut conn, new_user).unwrap(),
+        )
     }
 }
