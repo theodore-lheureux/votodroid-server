@@ -5,12 +5,12 @@ use graphql::{MutationRoot, QueryRoot};
 use juniper::{EmptySubscription, RootNode};
 use juniper_actix::graphql_handler;
 
-pub mod context;
-pub mod database;
-pub mod graphql;
-pub mod models;
-pub mod schema;
-pub mod services;
+mod context;
+mod database;
+mod graphql;
+mod models;
+mod schema;
+mod services;
 
 pub type Schema = RootNode<
     'static,

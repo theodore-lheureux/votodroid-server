@@ -5,7 +5,7 @@ use crate::{
 
 use juniper::graphql_object;
 
-pub mod user_resolver;
+mod user_resolver;
 
 pub struct QueryRoot;
 
