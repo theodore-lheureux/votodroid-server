@@ -25,17 +25,17 @@ impl UserQuery {
 
         if let Err(e) = user_id {
             errors.push(FieldError::new("userId".to_owned(), e.to_string()));
-            return UserResponse::build(None, Some(errors));
+            return UserResponse::from_errors(errors);
         }
 
         let user = get_by_id(&mut conn, user_id.unwrap());
 
         match user {
-            Ok(user) => UserResponse::build(Some(user), None),
+            Ok(user) => UserResponse::from_user(user),
             Err(e) => {
                 errors
                     .push(FieldError::new("userId".to_owned(), e.to_string()));
-                UserResponse::build(None, Some(errors))
+                UserResponse::from_errors(errors)
             }
         }
     }

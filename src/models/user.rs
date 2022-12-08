@@ -42,10 +42,16 @@ pub struct UserResponse {
 }
 
 impl UserResponse {
-    pub fn build<'a>(
-        user: Option<User>,
-        errors: Option<Vec<FieldError>>,
-    ) -> UserResponse {
-        UserResponse { user, errors }
+    pub fn from_user(user: User) -> UserResponse {
+        UserResponse {
+            user: Some(user),
+            errors: None,
+        }
+    }
+    pub fn from_errors(errors: Vec<FieldError>) -> UserResponse {
+        UserResponse {
+            user: None,
+            errors: Some(errors),
+        }
     }
 }
