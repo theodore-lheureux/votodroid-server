@@ -17,8 +17,6 @@ pub struct User {
     /// The user's email
     pub email: String,
     #[graphql(skip)]
-    pub salt: String,
-    #[graphql(skip)]
     pub password: String,
     /// The date and time the user was created
     pub created_at: NaiveDateTime,
@@ -26,16 +24,8 @@ pub struct User {
     pub updated_at: NaiveDateTime,
 }
 
-#[derive(Insertable)]
+#[derive(GraphQLInputObject, Insertable)]
 #[diesel(table_name = schema::users)]
-pub struct InsertableUser<'a> {
-    pub username: String,
-    pub email: String,
-    pub salt: &'a String,
-    pub password: String,
-}
-
-#[derive(GraphQLInputObject)]
 pub struct RegisterUserInput {
     /// The user's username
     pub username: String,

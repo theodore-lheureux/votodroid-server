@@ -5,7 +5,6 @@ diesel::table! {
         id -> Uuid,
         username -> Varchar,
         email -> Varchar,
-        salt -> Varchar,
         password -> Varchar,
         created_at -> Timestamp,
         updated_at -> Timestamp,

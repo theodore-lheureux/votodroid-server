@@ -53,7 +53,7 @@ pub struct UserMutation;
 
 #[juniper::graphql_object(Context = GraphQLContext)]
 impl UserMutation {
-    #[graphql(description = "create a new user")]
+    /// Register a new user
     fn register(
         ctx: &GraphQLContext,
         mut new_user: RegisterUserInput,
@@ -110,5 +110,47 @@ impl UserMutation {
         UserResponse::from_user(
             services::user::create_user(&mut conn, new_user).unwrap(),
         )
+    }
+    /// Login a user
+    fn login(
+        ctx: &GraphQLContext,
+        username_or_email: String,
+        password: String,
+    ) -> UserResponse {
+        let mut conn = ctx
+            .pool
+            .get()
+            .expect("Failed to get connection to database.");
+        let mut errors = vec![];
+        let user;
+
+        if username_or_email.contains('@') {
+            user = services::user::get_by_email(&mut conn, &username_or_email);
+        } else {
+            user =
+                services::user::get_by_username(&mut conn, &username_or_email);
+        }
+
+        match user {
+            Ok(user) => {
+                if !argon2::verify_encoded(&user.password, password.as_bytes())
+                    .unwrap()
+                {
+                    errors.push(FieldError::new(
+                        "password".to_owned(),
+                        "Password is incorrect.".to_owned(),
+                    ));
+                    return UserResponse::from_errors(errors);
+                }
+                UserResponse::from_user(user)
+            }
+            Err(_) => {
+                errors.push(FieldError::new(
+                    "usernameOrEmail".to_owned(),
+                    "Username or email does not exist.".to_owned(),
+                ));
+                UserResponse::from_errors(errors)
+            }
+        }
     }
 }
