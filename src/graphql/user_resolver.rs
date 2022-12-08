@@ -39,6 +39,14 @@ impl UserQuery {
             }
         }
     }
+
+    fn get_all(ctx: &GraphQLContext) -> Vec<User> {
+        let mut conn = ctx
+            .pool
+            .get()
+            .expect("Failed to get connection to database.");
+        services::user::get_all(&mut conn).unwrap()
+    }
 }
 
 pub struct UserMutation;
