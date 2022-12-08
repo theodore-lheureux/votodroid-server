@@ -1,9 +1,10 @@
 use actix_web::{web, Error, HttpResponse};
 use context::GraphQLContext;
 use database::get_pool;
-use juniper::{graphql_object, EmptySubscription, RootNode, FieldResult};
+use juniper::{graphql_object, EmptySubscription, FieldResult, RootNode};
 use juniper_actix::graphql_handler;
-use models::user::{User, RegisterUserInput};
+use models::user::{RegisterUserInput, User};
+use uuid::Uuid;
 
 use crate::services::user::get_user;
 
@@ -22,9 +23,12 @@ impl QueryRoot {
         "1.0"
     }
     #[graphql(description = "get a user")]
-    fn user(ctx: &GraphQLContext, user_id: i32) -> FieldResult<User> {
-        let mut conn = ctx.pool.get().expect("Failed to get connection to database.");
-        Ok(get_user(&mut conn, user_id).expect("User does not exist"))
+    fn user(ctx: &GraphQLContext, user_id: Uuid) -> FieldResult<User> {
+        let mut conn = ctx
+            .pool
+            .get()
+            .expect("Failed to get connection to database.");
+        Ok(get_user(&mut conn, user_id)?)
     }
 }
 
@@ -34,14 +38,24 @@ pub struct MutationRoot;
     description = "Mutation Root",)]
 impl MutationRoot {
     #[graphql(description = "create a new user")]
-    fn register_user(ctx: &GraphQLContext, new_user: RegisterUserInput) -> FieldResult<User> {
-        let mut conn = ctx.pool.get().expect("Failed to get connection to database.");
-        Ok(services::user::create_user(&mut conn, new_user).expect("Could not create user"))
+    fn register_user(
+        ctx: &GraphQLContext,
+        new_user: RegisterUserInput,
+    ) -> FieldResult<User> {
+        let mut conn = ctx
+            .pool
+            .get()
+            .expect("Failed to get connection to database.");
+        Ok(services::user::create_user(&mut conn, new_user)?)
     }
 }
 
-pub type Schema = RootNode<'static, QueryRoot, MutationRoot, EmptySubscription<GraphQLContext>>;
-
+pub type Schema = RootNode<
+    'static,
+    QueryRoot,
+    MutationRoot,
+    EmptySubscription<GraphQLContext>,
+>;
 
 pub fn schema() -> Schema {
     Schema::new(

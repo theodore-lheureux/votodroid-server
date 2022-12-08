@@ -11,6 +11,7 @@ actix-web = "4.2.1"
 env_logger = "0.10.0"
 juniper = "0.15.10"
 juniper_actix = "0.4.0"
-diesel = { version = "2.0.0", features = ["postgres", "r2d2", "chrono"] }
+uuid = { version="0.8.2", features = ["serde", "v4"] }
+diesel = { version = "2.0", features = ["postgres", "r2d2", "chrono", "uuid"] }
 dotenvy = "0.15"
 chrono = "0.4.23"

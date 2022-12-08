@@ -640,6 +640,7 @@ dependencies = [
  "itoa",
  "pq-sys",
  "r2d2",
+ "uuid",
 ]
 
 [[package]]
@@ -1876,6 +1877,10 @@ name = "uuid"
 version = "0.8.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "bc5cf98d8186244414c848017f0e2676b3fcb46807f6668a97dfe67359a3c4b7"
+dependencies = [
+ "getrandom 0.2.8",
+ "serde",
+]
 
 [[package]]
 name = "vcpkg"
@@ -1907,6 +1912,7 @@ dependencies = [
  "env_logger",
  "juniper",
  "juniper_actix",
+ "uuid",
 ]
 
 [[package]]

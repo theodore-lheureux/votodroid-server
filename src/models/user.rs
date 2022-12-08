@@ -1,14 +1,15 @@
 use chrono::NaiveDateTime;
 use diesel::{Insertable, Queryable};
 use juniper::{GraphQLInputObject, GraphQLObject};
+use uuid::Uuid;
 
 use crate::schema;
 
 #[derive(Clone, Queryable, GraphQLObject)]
 ///A user
 pub struct User {
-    /// The user's id
-    pub id: i32,
+    /// The user's id (UUID)
+    pub id: Uuid,
     /// The user's username
     pub username: String,
     /// The user's email
@@ -30,4 +31,9 @@ pub struct RegisterUserInput {
     pub email: String,
     // The user's password
     pub password: String,
+}
+
+pub struct UserResponse {
+    pub user: Option<User>,
+    pub error: Option<String>,
 }
