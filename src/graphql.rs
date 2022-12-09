@@ -8,6 +8,8 @@ use crate::{
 
 use juniper::graphql_object;
 
+use self::question_resolver::QuestionMutation;
+
 mod question_resolver;
 mod user_resolver;
 
@@ -34,5 +36,8 @@ pub struct MutationRoot;
 impl MutationRoot {
     fn users(&self) -> UserMutation {
         UserMutation
+    }
+    fn questions(&self) -> QuestionMutation {
+        QuestionMutation
     }
 }

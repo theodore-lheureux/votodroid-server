@@ -70,7 +70,9 @@ impl QuestionMutation {
                 return QuestionResponse::from_errors(errors);
             }
 
-            if !text.chars().all(|c| c.is_alphanumeric() || c == ' ') {
+            if !text.chars().all(|c| {
+                c.is_alphabetic() || c == ' ' || c.is_ascii_punctuation()
+            }) {
                 errors.push(FieldError::new(
                     "question".to_owned(),
                     "Question contains invalid characters.".to_owned(),
