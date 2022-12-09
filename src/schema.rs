@@ -18,6 +18,7 @@ diesel::table! {
         password -> Varchar,
         created_at -> Timestamp,
         updated_at -> Timestamp,
+        last_login -> Nullable<Timestamp>,
     }
 }
 

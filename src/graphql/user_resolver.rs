@@ -174,6 +174,7 @@ impl UserMutation {
                     return UserResponse::from_errors(errors);
                 }
 
+                services::user::update_last_login(&mut conn, user.id).unwrap();
                 ctx.session.insert("userId", user.id).unwrap();
                 UserResponse::from_user(user)
             }

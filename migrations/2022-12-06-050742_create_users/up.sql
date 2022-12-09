@@ -6,5 +6,6 @@ CREATE TABLE users (
     password VARCHAR(512) NOT NULL,
     created_at TIMESTAMP NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMP NOT NULL DEFAULT NOW(),
+    last_login TIMESTAMP,
     PRIMARY KEY (id)
 )

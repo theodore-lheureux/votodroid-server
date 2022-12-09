@@ -51,3 +51,12 @@ pub fn get_by_email(
 ) -> QueryResult<User> {
     users.filter(email.eq(user_email)).first(conn)
 }
+
+pub fn update_last_login(
+    conn: &mut PgConnection,
+    user_id: Uuid,
+) -> QueryResult<User> {
+    diesel::update(users.find(user_id))
+        .set(last_login.eq(diesel::dsl::now))
+        .get_result(conn)
+}

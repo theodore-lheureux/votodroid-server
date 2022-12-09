@@ -22,6 +22,8 @@ pub struct User {
     pub created_at: NaiveDateTime,
     /// The date and time the user was last updated
     pub updated_at: NaiveDateTime,
+    /// The date and time the user last logged in
+    pub last_login: Option<NaiveDateTime>,
 }
 
 #[derive(GraphQLInputObject, Insertable)]
