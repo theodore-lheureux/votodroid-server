@@ -2,7 +2,7 @@ use regex::Regex;
 use uuid::Uuid;
 
 use crate::{
-    context::GraphQLContext,
+    context::Context,
     models::{
         field_error::FieldError,
         user::{RegisterUserInput, User, UserResponse},
@@ -12,10 +12,10 @@ use crate::{
 
 pub struct UserQuery;
 
-#[juniper::graphql_object(Context = GraphQLContext)]
+#[juniper::graphql_object(Context = Context)]
 impl UserQuery {
     /// Get a user from their Id (UUID)
-    fn get_by_id(ctx: &GraphQLContext, user_id: String) -> UserResponse {
+    fn get_by_id(ctx: &Context, user_id: String) -> UserResponse {
         let mut conn = ctx
             .pool
             .get()
@@ -40,22 +40,53 @@ impl UserQuery {
         }
     }
 
-    fn get_all(ctx: &GraphQLContext) -> Vec<User> {
+    fn get_all(ctx: &Context) -> Vec<User> {
         let mut conn = ctx
             .pool
             .get()
             .expect("Failed to get connection to database.");
         services::user::get_all(&mut conn).unwrap()
     }
+
+    pub fn me(ctx: &Context) -> UserResponse {
+        let mut conn = ctx
+            .pool
+            .get()
+            .expect("Failed to get connection to database.");
+        let mut errors = vec![];
+
+        let user_id = ctx.session.get::<Uuid>("userId").unwrap();
+
+        if let Some(user_id) = user_id {
+            let user = get_by_id(&mut conn, user_id);
+
+            match user {
+                Ok(user) => UserResponse::from_user(user),
+                Err(e) => {
+                    errors.push(FieldError::new(
+                        "userId".to_owned(),
+                        e.to_string(),
+                    ));
+                    UserResponse::from_errors(errors)
+                }
+            }
+        } else {
+            errors.push(FieldError::new(
+                "userId".to_owned(),
+                "User is not logged in.".to_owned(),
+            ));
+            UserResponse::from_errors(errors)
+        }
+    }
 }
 
 pub struct UserMutation;
 
-#[juniper::graphql_object(Context = GraphQLContext)]
+#[juniper::graphql_object(Context = Context)]
 impl UserMutation {
     /// Register a new user
     fn register(
-        ctx: &GraphQLContext,
+        ctx: &Context,
         mut new_user: RegisterUserInput,
     ) -> UserResponse {
         let mut conn = ctx
@@ -111,9 +142,9 @@ impl UserMutation {
             services::user::create_user(&mut conn, new_user).unwrap(),
         )
     }
-    /// Login a user
+
     fn login(
-        ctx: &GraphQLContext,
+        ctx: &Context,
         username_or_email: String,
         password: String,
     ) -> UserResponse {
@@ -142,6 +173,8 @@ impl UserMutation {
                     ));
                     return UserResponse::from_errors(errors);
                 }
+
+                ctx.session.insert("userId", user.id).unwrap();
                 UserResponse::from_user(user)
             }
             Err(_) => {

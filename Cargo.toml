@@ -7,7 +7,7 @@ edition = "2021"
 
 [dependencies]
 actix-cors = "0.6.4"
-actix-web = "4.2.1"
+actix-web = { version = "4.2.1", features = ["openssl"] }
 env_logger = "0.10.0"
 juniper = "0.15.10"
 juniper_actix = "0.4.0"
@@ -18,3 +18,6 @@ chrono = "0.4.23"
 rust-argon2 = "1.0.0"
 rand = "0.8.5"
 regex = "1.7.0"
+actix-session = { version = "0.7.2", features = ["redis-actor-session"] }
+send_wrapper = "0.6.0"
+openssl = "0.10.44"

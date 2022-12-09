@@ -1,5 +1,5 @@
 use crate::{
-    context::GraphQLContext,
+    context::Context,
     graphql::user_resolver::{UserMutation, UserQuery},
 };
 
@@ -9,7 +9,7 @@ mod user_resolver;
 
 pub struct QueryRoot;
 
-#[graphql_object(Context = GraphQLContext,
+#[graphql_object(Context = Context,
     description = "Query Root",)]
 impl QueryRoot {
     fn api_version() -> &'static str {
@@ -22,7 +22,7 @@ impl QueryRoot {
 
 pub struct MutationRoot;
 
-#[graphql_object(Context = GraphQLContext,
+#[graphql_object(Context = Context,
     description = "Mutation Root",)]
 impl MutationRoot {
     fn users(&self) -> UserMutation {
