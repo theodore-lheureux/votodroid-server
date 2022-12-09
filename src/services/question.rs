@@ -23,6 +23,13 @@ pub fn get_by_id(
     questions.find(question_id).first(conn)
 }
 
+pub fn get_by_text(
+    conn: &mut PgConnection,
+    question_text: &String,
+) -> QueryResult<Question> {
+    questions.filter(text.like(question_text)).first(conn)
+}
+
 pub fn delete_all_by_user_id(
     conn: &mut PgConnection,
     userid: Uuid,

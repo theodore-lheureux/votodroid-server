@@ -1,10 +1,14 @@
 use crate::{
     context::Context,
-    graphql::user_resolver::{UserMutation, UserQuery},
+    graphql::{
+        question_resolver::QuestionQuery,
+        user_resolver::{UserMutation, UserQuery},
+    },
 };
 
 use juniper::graphql_object;
 
+mod question_resolver;
 mod user_resolver;
 
 pub struct QueryRoot;
@@ -17,6 +21,9 @@ impl QueryRoot {
     }
     fn users(&self) -> UserQuery {
         UserQuery
+    }
+    fn questions(&self) -> QuestionQuery {
+        QuestionQuery
     }
 }
 
