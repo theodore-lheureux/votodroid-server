@@ -40,6 +40,42 @@ impl QuestionQuery {
             }
         }
     }
+    fn get_paginated(
+        ctx: &Context,
+        cursor: Option<String>,
+        limit: Option<i32>,
+    ) -> Vec<Question> {
+        let mut conn = ctx
+            .pool
+            .get()
+            .expect("Failed to get connection to database.");
+        let cursor = Uuid::parse_str(&c);
+        let limit = limit.unwrap_or(20);
+        let mut errors = vec![];
+
+        if let Some(Err(e)) = cursor {
+            errors
+                .push(FieldError::new("cursor".to_owned(), e.to_string()));
+            return QuestionResponse::from_errors(errors);
+        }
+
+        let questions = services::question::get_paginated(
+            &mut conn,
+            cursor.map(|c| c.unwrap()),
+            limit,
+        );
+
+        match questions {
+            Ok(questions) => questions,
+            Err(e) => {
+                errors.push(FieldError::new(
+                    "questions".to_owned(),
+                    e.to_string(),
+                ));
+                QuestionResponse::from_errors(errors)
+            }
+        }
+    }
 }
 pub struct QuestionMutation;
 
