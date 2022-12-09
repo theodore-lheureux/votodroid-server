@@ -9,7 +9,7 @@ use schema::questions::dsl::*;
 
 pub fn create(
     conn: &mut PgConnection,
-    mut new_question: QuestionInput,
+    new_question: QuestionInput,
 ) -> QueryResult<Question> {
     diesel::insert_into(questions::table)
         .values(&new_question)
