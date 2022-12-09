@@ -27,9 +27,9 @@ pub struct Vote {
 #[derive(GraphQLInputObject, Insertable)]
 #[diesel(table_name = schema::votes)]
 pub struct VoteInput {
-    /// The question's text
+    /// The vote's value
     pub value: i32,
-    // The user who created the question
+    // The user who created the vote
     pub user_id: Uuid,
     /// The question for which the vote was created
     pub question_id: Uuid,
