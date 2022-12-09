@@ -21,7 +21,19 @@ diesel::table! {
     }
 }
 
+diesel::table! {
+    votes (id) {
+        id -> Uuid,
+        value -> Int4,
+        created_at -> Timestamp,
+        updated_at -> Timestamp,
+        user_id -> Uuid,
+        question_id -> Uuid,
+    }
+}
+
 diesel::allow_tables_to_appear_in_same_query!(
     questions,
     users,
+    votes,
 );
