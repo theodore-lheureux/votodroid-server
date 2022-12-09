@@ -1,3 +1,6 @@
 /target
 .env
 .gitpod.yml
+key.pem
+cert.pem
+nopass.pem
