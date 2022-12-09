@@ -186,4 +186,9 @@ impl UserMutation {
             }
         }
     }
+
+    fn logout(ctx: &Context) -> bool {
+        ctx.session.remove("userId");
+        true
+    }
 }
