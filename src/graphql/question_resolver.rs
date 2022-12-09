@@ -76,6 +76,48 @@ impl QuestionQuery {
             }
         }
     }
+    fn delete_all_by_user(ctx: &Context) -> bool {
+        let mut conn = ctx
+            .pool
+            .get()
+            .expect("Failed to get connection to database.");
+        let mut errors = vec![];
+
+        let user_id = ctx
+            .session
+            .get::<Uuid>("userId")
+            .expect("Failed to get user id from session.");
+
+        if let Some(user_id) = user_id {
+            let user = services::user::get_by_id(&mut conn, user_id);
+
+            if let Err(_) = user {
+                errors.push(FieldError::new(
+                    "userId".to_owned(),
+                    "User not logged in. (Please logout and login again)"
+                        .to_owned(),
+                ));
+                return QuestionResponse::from_errors(errors);
+            }
+
+            let questions = services::question::delete_all_by_user_id(
+                &mut conn,
+                user_id,
+            );
+
+            match questions {
+                Ok(_) => true,
+                Err(_) => false
+            }
+        } else {
+            errors.push(FieldError::new(
+                "userId".to_owned(),
+                "User not logged in.".to_owned(),
+            ));
+            QuestionResponse::from_errors(errors)
+        }
+    }
+
 }
 pub struct QuestionMutation;
 
