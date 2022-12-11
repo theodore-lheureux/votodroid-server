@@ -50,4 +50,37 @@ impl QuestionResponse {
             errors: Some(errors),
         }
     }
+    pub fn from_error(field: String, message: String) -> QuestionResponse {
+        QuestionResponse {
+            question: None,
+            errors: Some(vec![FieldError::new(field, message)]),
+        }
+    }
+}
+
+#[derive(GraphQLObject)]
+pub struct QuestionsResponse {
+    pub question: Option<Vec<Question>>,
+    pub errors: Option<Vec<FieldError>>,
+}
+
+impl QuestionsResponse {
+    pub fn from_questions(questions: Vec<Question>) -> QuestionsResponse {
+        QuestionsResponse {
+            question: Some(questions),
+            errors: None,
+        }
+    }
+    pub fn from_errors(errors: Vec<FieldError>) -> QuestionsResponse {
+        QuestionsResponse {
+            question: None,
+            errors: Some(errors),
+        }
+    }
+    pub fn from_error(field: String, message: String) -> QuestionsResponse {
+        QuestionsResponse {
+            question: None,
+            errors: Some(vec![FieldError::new(field, message)]),
+        }
+    }
 }

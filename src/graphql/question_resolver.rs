@@ -1,10 +1,11 @@
+use juniper::FieldResult;
 use uuid::Uuid;
 
 use crate::{
     context::Context,
     models::{
+        question::{QuestionInput, QuestionResponse, QuestionsResponse},
         types::FieldError,
-        question::{QuestionInput, QuestionResponse},
     },
     services::{self, question::get_by_id},
 };
@@ -40,85 +41,54 @@ impl QuestionQuery {
             }
         }
     }
+
     fn get_paginated(
         ctx: &Context,
-        cursor: Option<String>,
         limit: Option<i32>,
-    ) -> Vec<Question> {
+        cursor: Option<String>,
+    ) -> QuestionsResponse {
         let mut conn = ctx
             .pool
             .get()
             .expect("Failed to get connection to database.");
-        let cursor = Uuid::parse_str(&c);
         let limit = limit.unwrap_or(20);
-        let mut errors = vec![];
 
-        if let Some(Err(e)) = cursor {
-            errors
-                .push(FieldError::new("cursor".to_owned(), e.to_string()));
-            return QuestionResponse::from_errors(errors);
-        }
+        let cursor = match cursor {
+            Some(cursor) => {
+                let cursor = Uuid::parse_str(&cursor);
 
-        let questions = services::question::get_paginated(
-            &mut conn,
-            cursor.map(|c| c.unwrap()),
-            limit,
-        );
+                if let Err(e) = cursor {
+                    return QuestionsResponse::from_error(
+                        "cursor".to_owned(),
+                        e.to_string(),
+                    );
+                }
 
-        match questions {
-            Ok(questions) => questions,
-            Err(e) => {
-                errors.push(FieldError::new(
-                    "questions".to_owned(),
-                    e.to_string(),
-                ));
-                QuestionResponse::from_errors(errors)
+                Some(cursor.unwrap())
+            }
+            None => None,
+        };
+
+        if let Some(cursor) = cursor {
+            let question = get_by_id(&mut conn, cursor);
+
+            if let Err(_) = question {
+                return QuestionsResponse::from_error(
+                    "cursor".to_owned(),
+                    "No question found with corresponding Id.".to_owned(),
+                );
             }
         }
+
+        let questions =
+            services::question::get_paginated(&mut conn, limit, cursor);
+
+        QuestionsResponse::from_questions(
+            questions.expect("Failed to get questions."),
+        )
     }
-    fn delete_all_by_user(ctx: &Context) -> bool {
-        let mut conn = ctx
-            .pool
-            .get()
-            .expect("Failed to get connection to database.");
-        let mut errors = vec![];
-
-        let user_id = ctx
-            .session
-            .get::<Uuid>("userId")
-            .expect("Failed to get user id from session.");
-
-        if let Some(user_id) = user_id {
-            let user = services::user::get_by_id(&mut conn, user_id);
-
-            if let Err(_) = user {
-                errors.push(FieldError::new(
-                    "userId".to_owned(),
-                    "User not logged in. (Please logout and login again)"
-                        .to_owned(),
-                ));
-                return QuestionResponse::from_errors(errors);
-            }
-
-            let questions = services::question::delete_all_by_user_id(
-                &mut conn,
-                user_id,
-            );
-
-            match questions {
-                Ok(_) => true,
-                Err(_) => false
-            }
-        } else {
-            errors.push(FieldError::new(
-                "userId".to_owned(),
-                "User not logged in.".to_owned(),
-            ));
-            QuestionResponse::from_errors(errors)
-        }
-    }
-
 }
+
 pub struct QuestionMutation;
 
 #[juniper::graphql_object(Context = Context)]
@@ -190,6 +160,38 @@ impl QuestionMutation {
             ));
             QuestionResponse::from_errors(errors)
         }
+    }
+
+    fn delete_all_by_user(ctx: &Context) -> FieldResult<bool> {
+        let mut conn = ctx
+            .pool
+            .get()
+            .expect("Failed to get connection to database.");
+
+        let user_id = ctx
+            .session
+            .get::<Uuid>("userId")
+            .expect("Failed to get user id from session.");
+
+        if let Some(user_id) = user_id {
+            let user = services::user::get_by_id(&mut conn, user_id);
+
+            if let Err(_) = user {
+                return Err(juniper::FieldError::from(
+                    "User not logged in. (Please logout and login again)",
+                ));
+            }
+
+            let result =
+                services::question::delete_all_by_user_id(&mut conn, user_id);
+
+            if let Err(e) = result {
+                return Err(juniper::FieldError::from(e.to_string()));
+            }
+
+            return Ok(true);
+        }
+        Err(juniper::FieldError::from("User not logged in."))
     }
 }
 
