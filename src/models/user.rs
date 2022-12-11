@@ -5,7 +5,7 @@ use uuid::Uuid;
 
 use crate::schema;
 
-use super::field_error::FieldError;
+use super::types::FieldError;
 
 #[derive(Clone, Queryable, GraphQLObject)]
 ///A user
@@ -54,6 +54,12 @@ impl UserResponse {
         UserResponse {
             user: None,
             errors: Some(errors),
+        }
+    }
+    pub fn from_error(field: String, message: String) -> UserResponse {
+        UserResponse {
+            user: None,
+            errors: Some(vec![FieldError::new(field, message)]),
         }
     }
 }

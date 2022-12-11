@@ -50,15 +50,12 @@ pub fn get_all_by_user_id(
 
 pub fn get_paginated(
     conn: &mut PgConnection,
-    limit: i64,
+    limit: i32,
     cursor: Option<Uuid>,
 ) -> QueryResult<Vec<Question>> {
     let mut query = questions.into_boxed();
     if let Some(cursor) = cursor {
         query = query.filter(id.lt(cursor));
     }
-    query
-        .order(id.desc())
-        .limit(limit as i64)
-        .load::<Question>(conn)
+    query.order(id.desc()).limit(limit as i64).load::<Question>(conn)
 }

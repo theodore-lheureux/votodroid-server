@@ -4,7 +4,7 @@ use uuid::Uuid;
 use crate::{
     context::Context,
     models::{
-        field_error::FieldError,
+        types::FieldError,
         user::{RegisterUserInput, User, UserResponse},
     },
     services::{self, user::get_by_id},
@@ -21,11 +21,12 @@ impl UserQuery {
             .get()
             .expect("Failed to get connection to database.");
         let user_id = Uuid::parse_str(&user_id);
-        let mut errors = vec![];
 
         if let Err(e) = user_id {
-            errors.push(FieldError::new("userId".to_owned(), e.to_string()));
-            return UserResponse::from_errors(errors);
+            return UserResponse::from_error(
+                "userId".to_owned(),
+                e.to_string(),
+            );
         }
 
         let user = get_by_id(&mut conn, user_id.unwrap());
@@ -33,9 +34,7 @@ impl UserQuery {
         match user {
             Ok(user) => UserResponse::from_user(user),
             Err(e) => {
-                errors
-                    .push(FieldError::new("userId".to_owned(), e.to_string()));
-                UserResponse::from_errors(errors)
+                UserResponse::from_error("userId".to_owned(), e.to_string())
             }
         }
     }
@@ -53,8 +52,6 @@ impl UserQuery {
             .pool
             .get()
             .expect("Failed to get connection to database.");
-        let mut errors = vec![];
-
         let user_id = ctx.session.get::<Uuid>("userId").unwrap();
 
         if let Some(user_id) = user_id {
@@ -63,19 +60,14 @@ impl UserQuery {
             match user {
                 Ok(user) => UserResponse::from_user(user),
                 Err(e) => {
-                    errors.push(FieldError::new(
-                        "userId".to_owned(),
-                        e.to_string(),
-                    ));
-                    UserResponse::from_errors(errors)
+                    UserResponse::from_error("userId".to_owned(), e.to_string())
                 }
             }
         } else {
-            errors.push(FieldError::new(
+            UserResponse::from_error(
                 "userId".to_owned(),
                 "User is not logged in.".to_owned(),
-            ));
-            UserResponse::from_errors(errors)
+            )
         }
     }
 }

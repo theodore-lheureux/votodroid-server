@@ -5,7 +5,7 @@ use uuid::Uuid;
 
 use crate::schema;
 
-use super::field_error::FieldError;
+use super::types::FieldError;
 
 #[derive(Clone, Queryable, GraphQLObject)]
 ///A question

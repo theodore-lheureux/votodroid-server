@@ -3,7 +3,7 @@ use uuid::Uuid;
 use crate::{
     context::Context,
     models::{
-        field_error::FieldError,
+        types::FieldError,
         question::{QuestionInput, QuestionResponse},
     },
     services::{self, question::get_by_id},
