@@ -37,17 +37,6 @@ pub fn delete_all_by_user_id(
     diesel::delete(questions.filter(user_id.eq(userid))).execute(conn)
 }
 
-pub fn get_all(conn: &mut PgConnection) -> QueryResult<Vec<Question>> {
-    questions.load(conn)
-}
-
-pub fn get_all_by_user_id(
-    conn: &mut PgConnection,
-    userid: Uuid,
-) -> QueryResult<Vec<Question>> {
-    questions.filter(user_id.eq(userid)).load(conn)
-}
-
 pub fn get_paginated(
     conn: &mut PgConnection,
     limit: i32,
@@ -57,5 +46,8 @@ pub fn get_paginated(
     if let Some(cursor) = cursor {
         query = query.filter(id.lt(cursor));
     }
-    query.order(id.desc()).limit(limit as i64).load::<Question>(conn)
+    query
+        .order(id.desc())
+        .limit(limit as i64)
+        .load::<Question>(conn)
 }

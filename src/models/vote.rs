@@ -49,12 +49,6 @@ impl VoteResponse {
             errors: None,
         }
     }
-    pub fn from_errors(errors: Vec<FieldError>) -> VoteResponse {
-        VoteResponse {
-            vote: None,
-            errors: Some(errors),
-        }
-    }
     pub fn from_error(field: String, message: String) -> VoteResponse {
         VoteResponse {
             vote: None,

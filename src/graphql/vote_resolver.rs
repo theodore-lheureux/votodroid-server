@@ -27,7 +27,7 @@ impl VoteQuery {
 
         match avg {
             Ok(avg) => {
-                format!("{:.2}", avg.unwrap_or(BigDecimal::from(0)).round(2))
+                format!("{:.2}", avg.unwrap_or_else(|| BigDecimal::from(0)).round(2))
             }
             Err(_e) => "0.00".to_owned(),
         }
@@ -100,7 +100,7 @@ impl VoteMutation {
             );
         }
 
-        if value < 0 || value > 5 {
+        if !(0..=5).contains(&value) {
             return VoteResponse::from_error(
                 "value".to_owned(),
                 "Value must be from 0 to 5".to_owned(),
@@ -120,7 +120,7 @@ impl VoteMutation {
         let vote = services::vote::get_by_user_id_and_question_id(
             &mut conn,
             user_id,
-            question_id.clone(),
+            question_id,
         );
 
         if let Ok(vote) = vote {

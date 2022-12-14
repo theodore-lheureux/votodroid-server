@@ -44,12 +44,6 @@ impl QuestionResponse {
             errors: None,
         }
     }
-    pub fn from_errors(errors: Vec<FieldError>) -> QuestionResponse {
-        QuestionResponse {
-            question: None,
-            errors: Some(errors),
-        }
-    }
     pub fn from_error(field: String, message: String) -> QuestionResponse {
         QuestionResponse {
             question: None,
@@ -69,12 +63,6 @@ impl QuestionsResponse {
         QuestionsResponse {
             questions: Some(questions),
             errors: None,
-        }
-    }
-    pub fn from_errors(errors: Vec<FieldError>) -> QuestionsResponse {
-        QuestionsResponse {
-            questions: None,
-            errors: Some(errors),
         }
     }
     pub fn from_error(field: String, message: String) -> QuestionsResponse {

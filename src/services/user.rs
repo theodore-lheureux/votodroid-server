@@ -34,10 +34,6 @@ pub fn get_by_id(conn: &mut PgConnection, user_id: Uuid) -> QueryResult<User> {
     users.find(user_id).first(conn)
 }
 
-pub fn get_all(conn: &mut PgConnection) -> QueryResult<Vec<User>> {
-    users.load(conn)
-}
-
 pub fn get_by_username(
     conn: &mut PgConnection,
     name: &String,
