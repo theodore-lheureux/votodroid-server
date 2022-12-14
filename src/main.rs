@@ -49,4 +49,10 @@ async fn main() -> std::io::Result<()> {
         .unwrap()
         .run()
         .await
+
+    // server
+    //     .bind("127.0.0.1:8080")
+    //     .unwrap()
+    //     .run()
+    //     .await
 }

@@ -20,25 +20,22 @@ impl QuestionQuery {
             .get()
             .expect("Failed to get connection to database.");
         let question_id = Uuid::parse_str(&question_id);
-        let mut errors = vec![];
 
         if let Err(e) = question_id {
-            errors
-                .push(FieldError::new("questionId".to_owned(), e.to_string()));
-            return QuestionResponse::from_errors(errors);
+            return QuestionResponse::from_error(
+                "questionId".to_owned(),
+                e.to_string(),
+            );
         }
 
         let question = get_by_id(&mut conn, question_id.unwrap());
 
         match question {
             Ok(question) => QuestionResponse::from_question(question),
-            Err(e) => {
-                errors.push(FieldError::new(
-                    "questionId".to_owned(),
-                    e.to_string(),
-                ));
-                QuestionResponse::from_errors(errors)
-            }
+            Err(e) => QuestionResponse::from_error(
+                "questionId".to_owned(),
+                e.to_string(),
+            ),
         }
     }
 
@@ -99,7 +96,6 @@ impl QuestionMutation {
             .get()
             .expect("Failed to get connection to database.");
         let text = trim_whitespace(&text);
-        let mut errors = vec![];
 
         let user_id = ctx
             .session
@@ -110,32 +106,37 @@ impl QuestionMutation {
             let user = services::user::get_by_id(&mut conn, user_id);
 
             if user.is_err() {
-                errors.push(FieldError::new(
+                return QuestionResponse::from_error(
                     "userId".to_owned(),
                     "User not logged in. (Please logout and login again)"
                         .to_owned(),
-                ));
-                return QuestionResponse::from_errors(errors);
+                );
+            }
+
+            if text.len() < 4 {
+                return QuestionResponse::from_error(
+                    "question".to_owned(),
+                    "Question must be at least 4 characters long."
+                        .to_owned(),
+                );
             }
 
             if !text.chars().all(|c| {
                 c.is_alphabetic() || c == ' ' || c.is_ascii_punctuation()
             }) {
-                errors.push(FieldError::new(
+                return QuestionResponse::from_error(
                     "question".to_owned(),
                     "Question contains invalid characters.".to_owned(),
-                ));
-                return QuestionResponse::from_errors(errors);
+                );
             }
 
             let question = services::question::get_by_text(&mut conn, &text);
 
             if question.is_ok() {
-                errors.push(FieldError::new(
+                return QuestionResponse::from_error(
                     "question".to_owned(),
                     "Question already exists.".to_owned(),
-                ));
-                return QuestionResponse::from_errors(errors);
+                );
             }
 
             let question = services::question::create(
@@ -145,20 +146,16 @@ impl QuestionMutation {
 
             match question {
                 Ok(question) => QuestionResponse::from_question(question),
-                Err(e) => {
-                    errors.push(FieldError::new(
-                        "question".to_owned(),
-                        e.to_string(),
-                    ));
-                    QuestionResponse::from_errors(errors)
-                }
+                Err(e) => QuestionResponse::from_error(
+                    "question".to_owned(),
+                    e.to_string(),
+                ),
             }
         } else {
-            errors.push(FieldError::new(
+            QuestionResponse::from_error(
                 "userId".to_owned(),
                 "User not logged in.".to_owned(),
-            ));
-            QuestionResponse::from_errors(errors)
+            )
         }
     }
 
