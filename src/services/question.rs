@@ -1,4 +1,4 @@
-use diesel::prelude::*;
+use diesel::{dsl::sql, prelude::*, sql_types::Text};
 use uuid::Uuid;
 
 use crate::{
@@ -18,9 +18,9 @@ pub fn create(
 
 pub fn get_by_id(
     conn: &mut PgConnection,
-    question_id: Uuid,
+    question_uuid: Uuid,
 ) -> QueryResult<Question> {
-    questions.find(question_id).first(conn)
+    questions.find(question_uuid).first(conn)
 }
 
 pub fn get_by_text(
@@ -47,7 +47,7 @@ pub fn get_paginated(
         query = query.filter(id.lt(cursor));
     }
     query
-        .order(id.desc())
+        .order_by(sql::<Text>("(SELECT COUNT(value) FROM votes WHERE votes.question_id = questions.id) DESC"))
         .limit(limit as i64)
-        .load::<Question>(conn)
+        .load(conn)
 }
