@@ -3,10 +3,7 @@ use uuid::Uuid;
 
 use crate::{
     context::Context,
-    models::{
-        question::{QuestionInput, QuestionResponse, QuestionsResponse},
-        types::FieldError,
-    },
+    models::question::{QuestionInput, QuestionResponse, QuestionsResponse},
     services::{self, question::get_by_id},
 };
 
@@ -116,8 +113,7 @@ impl QuestionMutation {
             if text.len() < 4 {
                 return QuestionResponse::from_error(
                     "question".to_owned(),
-                    "Question must be at least 4 characters long."
-                        .to_owned(),
+                    "Question must be at least 4 characters long.".to_owned(),
                 );
             }
 

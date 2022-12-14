@@ -1,3 +1,4 @@
+use bigdecimal::BigDecimal;
 use diesel::prelude::*;
 use diesel::{PgConnection, QueryResult};
 use uuid::Uuid;
@@ -95,5 +96,27 @@ pub fn update(
 ) -> QueryResult<Vote> {
     diesel::update(votes.find(voteid))
         .set((value.eq(new_value), updated_at.eq(diesel::dsl::now)))
+        .get_result(conn)
+}
+
+pub fn avg_for_question(
+    conn: &mut PgConnection,
+    questionid: Uuid,
+) -> QueryResult<Option<BigDecimal>> {
+    votes
+        .filter(question_id.eq(questionid))
+        .select(diesel::dsl::avg(value))
+        .first(conn)
+}
+
+pub fn count_for_question_with_value(
+    conn: &mut PgConnection,
+    questionid: Uuid,
+    votevalue: i32,
+) -> QueryResult<i64> {
+    votes
+        .filter(question_id.eq(questionid))
+        .filter(value.eq(votevalue))
+        .count()
         .get_result(conn)
 }

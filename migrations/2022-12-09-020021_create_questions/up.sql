@@ -4,6 +4,6 @@ CREATE TABLE questions (
     text VARCHAR(128) NOT NULL UNIQUE,
     created_at TIMESTAMP NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMP NOT NULL DEFAULT NOW(),
-    user_id uuid NOT NULL,
+    user_id uuid NOT NULL references users(id),
     PRIMARY KEY (id)
 )

@@ -1,6 +1,6 @@
 use chrono::NaiveDateTime;
 use diesel::prelude::*;
-use juniper::{GraphQLInputObject, GraphQLObject};
+use juniper::GraphQLObject;
 use uuid::Uuid;
 
 use crate::schema;
@@ -19,12 +19,13 @@ pub struct Vote {
     /// The date and time the vote was last updated
     pub updated_at: NaiveDateTime,
     /// The user who created the vote
+    #[graphql(skip)]
     pub user_id: Uuid,
     /// The question for which the vote was created
     pub question_id: Uuid,
 }
 
-#[derive(GraphQLInputObject, Insertable)]
+#[derive(Insertable)]
 #[diesel(table_name = schema::votes)]
 pub struct VoteInput {
     /// The vote's value
@@ -52,6 +53,12 @@ impl VoteResponse {
         VoteResponse {
             vote: None,
             errors: Some(errors),
+        }
+    }
+    pub fn from_error(field: String, message: String) -> VoteResponse {
+        VoteResponse {
+            vote: None,
+            errors: Some(vec![FieldError { field, message }]),
         }
     }
 }

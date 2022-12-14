@@ -12,7 +12,7 @@ env_logger = "0.10.0"
 juniper = "0.15.10"
 juniper_actix = "0.4.0"
 uuid = { version="0.8.2", features = ["serde", "v4"] }
-diesel = { version = "2.0", features = ["postgres", "r2d2", "chrono", "uuid"] }
+diesel = { version = "2.0", features = ["postgres", "r2d2", "chrono", "uuid", "numeric"] }
 dotenvy = "0.15"
 chrono = "0.4.23"
 rust-argon2 = "1.0.0"
@@ -21,3 +21,4 @@ regex = "1.7.0"
 actix-session = { version = "0.7.2", features = ["redis-actor-session"] }
 send_wrapper = "0.6.0"
 openssl = "0.10.44"
+bigdecimal = "0.3.0"

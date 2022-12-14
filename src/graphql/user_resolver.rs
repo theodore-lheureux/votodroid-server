@@ -5,7 +5,7 @@ use crate::{
     context::Context,
     models::{
         types::FieldError,
-        user::{RegisterUserInput, User, UserResponse},
+        user::{RegisterUserInput, UserResponse},
     },
     services::{self, user::get_by_id},
 };
@@ -14,39 +14,6 @@ pub struct UserQuery;
 
 #[juniper::graphql_object(Context = Context)]
 impl UserQuery {
-    /// Get a user from their Id (UUID)
-    fn get_by_id(ctx: &Context, user_id: String) -> UserResponse {
-        let mut conn = ctx
-            .pool
-            .get()
-            .expect("Failed to get connection to database.");
-        let user_id = Uuid::parse_str(&user_id);
-
-        if let Err(e) = user_id {
-            return UserResponse::from_error(
-                "userId".to_owned(),
-                e.to_string(),
-            );
-        }
-
-        let user = get_by_id(&mut conn, user_id.unwrap());
-
-        match user {
-            Ok(user) => UserResponse::from_user(user),
-            Err(e) => {
-                UserResponse::from_error("userId".to_owned(), e.to_string())
-            }
-        }
-    }
-
-    fn get_all(ctx: &Context) -> Vec<User> {
-        let mut conn = ctx
-            .pool
-            .get()
-            .expect("Failed to get connection to database.");
-        services::user::get_all(&mut conn).unwrap()
-    }
-
     pub fn me(ctx: &Context) -> UserResponse {
         let mut conn = ctx
             .pool
@@ -145,7 +112,7 @@ impl UserMutation {
             .get()
             .expect("Failed to get connection to database.");
         let mut errors = vec![];
-        
+
         let user = if username_or_email.contains('@') {
             services::user::get_by_email(&mut conn, &username_or_email)
         } else {

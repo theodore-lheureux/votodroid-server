@@ -33,6 +33,10 @@ diesel::table! {
     }
 }
 
+diesel::joinable!(questions -> users (user_id));
+diesel::joinable!(votes -> questions (question_id));
+diesel::joinable!(votes -> users (user_id));
+
 diesel::allow_tables_to_appear_in_same_query!(
     questions,
     users,

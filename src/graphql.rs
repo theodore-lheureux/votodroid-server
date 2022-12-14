@@ -12,6 +12,7 @@ use self::question_resolver::QuestionMutation;
 
 mod question_resolver;
 mod user_resolver;
+mod vote_resolver;
 
 pub struct QueryRoot;
 
@@ -27,6 +28,9 @@ impl QueryRoot {
     fn questions(&self) -> QuestionQuery {
         QuestionQuery
     }
+    fn votes(&self) -> vote_resolver::VoteQuery {
+        vote_resolver::VoteQuery
+    }
 }
 
 pub struct MutationRoot;
@@ -39,5 +43,8 @@ impl MutationRoot {
     }
     fn questions(&self) -> QuestionMutation {
         QuestionMutation
+    }
+    fn votes(&self) -> vote_resolver::VoteMutation {
+        vote_resolver::VoteMutation
     }
 }
