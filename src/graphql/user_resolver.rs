@@ -145,14 +145,12 @@ impl UserMutation {
             .get()
             .expect("Failed to get connection to database.");
         let mut errors = vec![];
-        let user;
-
-        if username_or_email.contains('@') {
-            user = services::user::get_by_email(&mut conn, &username_or_email);
+        
+        let user = if username_or_email.contains('@') {
+            services::user::get_by_email(&mut conn, &username_or_email)
         } else {
-            user =
-                services::user::get_by_username(&mut conn, &username_or_email);
-        }
+            services::user::get_by_username(&mut conn, &username_or_email)
+        };
 
         match user {
             Ok(user) => {

@@ -72,7 +72,7 @@ impl QuestionQuery {
         if let Some(cursor) = cursor {
             let question = get_by_id(&mut conn, cursor);
 
-            if let Err(_) = question {
+            if question.is_err() {
                 return QuestionsResponse::from_error(
                     "cursor".to_owned(),
                     "No question found with corresponding Id.".to_owned(),
@@ -109,7 +109,7 @@ impl QuestionMutation {
         if let Some(user_id) = user_id {
             let user = services::user::get_by_id(&mut conn, user_id);
 
-            if let Err(_) = user {
+            if user.is_err() {
                 errors.push(FieldError::new(
                     "userId".to_owned(),
                     "User not logged in. (Please logout and login again)"
@@ -130,7 +130,7 @@ impl QuestionMutation {
 
             let question = services::question::get_by_text(&mut conn, &text);
 
-            if let Ok(_) = question {
+            if question.is_ok() {
                 errors.push(FieldError::new(
                     "question".to_owned(),
                     "Question already exists.".to_owned(),
@@ -176,7 +176,7 @@ impl QuestionMutation {
         if let Some(user_id) = user_id {
             let user = services::user::get_by_id(&mut conn, user_id);
 
-            if let Err(_) = user {
+            if user.is_err() {
                 return Err(juniper::FieldError::from(
                     "User not logged in. (Please logout and login again)",
                 ));
