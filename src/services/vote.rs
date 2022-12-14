@@ -40,15 +40,15 @@ pub fn get_all_by_question_id(
     votes.filter(question_id.eq(questionid)).load(conn)
 }
 
-pub fn get_all_by_user_id_and_question_id(
+pub fn get_by_user_id_and_question_id(
     conn: &mut PgConnection,
     userid: Uuid,
     questionid: Uuid,
-) -> QueryResult<Vec<Vote>> {
+) -> QueryResult<Vote> {
     votes
         .filter(user_id.eq(userid))
         .filter(question_id.eq(questionid))
-        .load(conn)
+        .first(conn)
 }
 
 pub fn delete_all_by_user_id(

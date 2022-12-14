@@ -22,13 +22,13 @@ impl VoteQuery {
             return "0.00".to_owned();
         }
 
-        let avg = services::vote::avg_for_question(
-            &mut conn,
-            question_id.unwrap(),
-        );
+        let avg =
+            services::vote::avg_for_question(&mut conn, question_id.unwrap());
 
         match avg {
-            Ok(avg) => format!("{:.2}", avg.unwrap_or(BigDecimal::from(0)).round(2)),
+            Ok(avg) => {
+                format!("{:.2}", avg.unwrap_or(BigDecimal::from(0)).round(2))
+            }
             Err(_e) => "0.00".to_owned(),
         }
     }
@@ -67,7 +67,14 @@ impl VoteQuery {
         let mut result: Vec<i32> = vec![];
 
         for i in 0..6 {
-            result.push(services::vote::count_for_question_with_value(&mut conn, question_id.clone().unwrap(), i).unwrap() as i32);
+            result.push(
+                services::vote::count_for_question_with_value(
+                    &mut conn,
+                    question_id.clone().unwrap(),
+                    i,
+                )
+                .unwrap() as i32,
+            );
         }
 
         result
@@ -100,27 +107,50 @@ impl VoteMutation {
             );
         }
 
-        if let Some(user_id) = user_id {
-            let vote = services::vote::create(
-                &mut conn,
-                VoteInput {
-                    value,
-                    user_id,
-                    question_id: question_id.unwrap(),
-                },
-            );
-
-            match vote {
-                Ok(vote) => VoteResponse::from_vote(vote),
-                Err(e) => {
-                    VoteResponse::from_error("userId".to_owned(), e.to_string())
-                }
-            }
-        } else {
-            VoteResponse::from_error(
+        if user_id.is_none() {
+            return VoteResponse::from_error(
                 "userId".to_owned(),
                 "User not logged in".to_owned(),
-            )
+            );
+        }
+
+        let user_id = user_id.unwrap();
+        let question_id = question_id.unwrap();
+
+        let vote = services::vote::get_by_user_id_and_question_id(
+            &mut conn,
+            user_id,
+            question_id.clone(),
+        );
+
+        if let Ok(vote) = vote {
+            let vote = services::vote::update(&mut conn, vote.id, value);
+
+            match vote {
+                Ok(vote) => return VoteResponse::from_vote(vote),
+                Err(e) => {
+                    return VoteResponse::from_error(
+                        "userId".to_owned(),
+                        e.to_string(),
+                    );
+                }
+            }
+        }
+
+        let vote = services::vote::create(
+            &mut conn,
+            VoteInput {
+                value,
+                user_id,
+                question_id,
+            },
+        );
+
+        match vote {
+            Ok(vote) => VoteResponse::from_vote(vote),
+            Err(e) => {
+                VoteResponse::from_error("userId".to_owned(), e.to_string())
+            }
         }
     }
 }
