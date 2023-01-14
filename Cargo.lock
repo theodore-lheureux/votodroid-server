@@ -2298,6 +2298,15 @@ dependencies = [
  "rust-argon2",
  "send_wrapper",
  "uuid",
+ "votodroid_server_derive",
+]
+
+[[package]]
+name = "votodroid_server_derive"
+version = "0.1.0"
+dependencies = [
+ "quote",
+ "syn",
 ]
 
 [[package]]

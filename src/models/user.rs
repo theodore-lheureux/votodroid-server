@@ -2,6 +2,7 @@ use chrono::NaiveDateTime;
 use diesel::{Insertable, Queryable};
 use juniper::{GraphQLInputObject, GraphQLObject};
 use uuid::Uuid;
+use votodroid_server_derive::VotodroidResponseObject;
 
 use crate::schema;
 
@@ -37,29 +38,8 @@ pub struct RegisterUserInput {
     pub password: String,
 }
 
-#[derive(GraphQLObject)]
+#[derive(GraphQLObject, VotodroidResponseObject)]
 pub struct UserResponse {
     pub user: Option<User>,
     pub errors: Option<Vec<FieldError>>,
-}
-
-impl UserResponse {
-    pub fn from_user(user: User) -> UserResponse {
-        UserResponse {
-            user: Some(user),
-            errors: None,
-        }
-    }
-    pub fn from_errors(errors: Vec<FieldError>) -> UserResponse {
-        UserResponse {
-            user: None,
-            errors: Some(errors),
-        }
-    }
-    pub fn from_error(field: String, message: String) -> UserResponse {
-        UserResponse {
-            user: None,
-            errors: Some(vec![FieldError::new(field, message)]),
-        }
-    }
 }

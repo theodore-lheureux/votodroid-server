@@ -2,6 +2,7 @@ use chrono::NaiveDateTime;
 use diesel::prelude::*;
 use juniper::GraphQLObject;
 use uuid::Uuid;
+use votodroid_server_derive::VotodroidResponseObject;
 
 use crate::schema;
 
@@ -36,23 +37,8 @@ pub struct VoteInput {
     pub question_id: Uuid,
 }
 
-#[derive(GraphQLObject)]
+#[derive(GraphQLObject, VotodroidResponseObject)]
 pub struct VoteResponse {
     pub vote: Option<Vote>,
     pub errors: Option<Vec<FieldError>>,
-}
-
-impl VoteResponse {
-    pub fn from_vote(vote: Vote) -> VoteResponse {
-        VoteResponse {
-            vote: Some(vote),
-            errors: None,
-        }
-    }
-    pub fn from_error(field: String, message: String) -> VoteResponse {
-        VoteResponse {
-            vote: None,
-            errors: Some(vec![FieldError { field, message }]),
-        }
-    }
 }
