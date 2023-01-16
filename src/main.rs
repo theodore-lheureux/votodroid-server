@@ -10,6 +10,7 @@ use actix_web::{
     web::{self, Data},
     App, HttpServer,
 };
+#[cfg(debug_assertions)]
 use openssl::ssl::{SslAcceptor, SslFiletype, SslMethod};
 use votodroid_server::{graphql_route, schema};
 
@@ -39,11 +40,7 @@ async fn main() -> std::io::Result<()> {
             )
     });
 
-    server
-        .bind("127.0.0.1:8080")
-        .unwrap()
-        .run()
-        .await
+    server.bind("127.0.0.1:8080").unwrap().run().await
 }
 
 #[cfg(debug_assertions)]
@@ -55,8 +52,7 @@ async fn main() -> std::io::Result<()> {
     let secret_key = Key::generate();
     let redis_url = "127.0.0.1:6379";
 
-    let mut builder =
-        SslAcceptor::mozilla_intermediate(SslMethod::tls()).unwrap();
+    let mut builder = SslAcceptor::mozilla_intermediate(SslMethod::tls()).unwrap();
     builder
         .set_private_key_file("nopass.pem", SslFiletype::PEM)
         .unwrap();
@@ -83,5 +79,4 @@ async fn main() -> std::io::Result<()> {
         .unwrap()
         .run()
         .await
-
 }

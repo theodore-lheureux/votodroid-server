@@ -32,9 +32,7 @@ fn impl_votodroid_response_object(ast: &syn::DeriveInput) -> TokenStream {
         }
         panic!("VotodroidResponseObject first field must be Option<T>");
     })();
-
     let from_name = syn::Ident::new(&format!("from_{}", first_field_name), name.span());
-
     let out = quote! {
         impl #name {
             pub fn #from_name(arg: #object_name) -> #name {
@@ -57,5 +55,6 @@ fn impl_votodroid_response_object(ast: &syn::DeriveInput) -> TokenStream {
             }
         }
     };
+
     out.into()
 }
