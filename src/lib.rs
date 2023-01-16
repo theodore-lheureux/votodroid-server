@@ -26,7 +26,6 @@ pub async fn graphql_route(
     data: web::Data<Schema>,
     session: actix_session::Session,
 ) -> Result<HttpResponse, Error> {
-    // session.insert("test", "test").expect("failed");
     let context = Context {
         pool: get_pool(),
         session: shared::Shared::new(session),
